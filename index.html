@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AGENCY: Spy Protocol</title>
+    <!-- Подключаем Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Share+Tech+Mono&display=swap');
@@ -14,7 +15,7 @@
             font-family: 'Major Mono Display', monospace;
         }
         .card-inner {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
         .flipped {
@@ -31,26 +32,30 @@
 </head>
 <body class="bg-[#080c0a] text-[#00ff88] min-h-screen flex flex-col justify-between p-4 selection:bg-[#00ff88] selection:text-black">
 
+    <!-- Хедер -->
     <header class="border-b border-[#00ff88]/20 py-3 flex justify-between items-center max-w-2xl mx-auto w-full">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] animate-pulse"></span>
-            <span class="text-xl font-bold header-font">spy_protocol_v3.0</span>
+            <span class="text-xl font-bold header-font">spy_protocol_v3.2</span>
         </div>
-        <div class="text-[10px] text-[#00ff88]/50 uppercase tracking-[2px]">ИИ Генератор // Полная Свобода</div>
+        <div class="text-[10px] text-[#00ff88]/50 uppercase tracking-[2px]">ИИ Фикс // Защита от подглядывания</div>
     </header>
 
+    <!-- Основной контейнер игры -->
     <main class="flex-grow flex items-center justify-center my-8 w-full max-w-2xl mx-auto">
         
+        <!-- ЭКРАН 1: НАСТРОЙКИ -->
         <div id="setup-screen" class="w-full bg-[#0d1210] border border-[#00ff88]/15 p-6 rounded-xl shadow-[0_0_25px_rgba(0,255,136,0.03)]">
             <h1 class="text-2xl text-center font-bold tracking-widest mb-7 uppercase text-white border-b border-[#00ff88]/20 pb-4">
                 Инициализация Миссии
             </h1>
 
+            <!-- Выбор режима генерации -->
             <div class="mb-7">
                 <label class="block text-xs uppercase tracking-wider text-[#00ff88]/60 mb-2">Метод определения слова</label>
                 <div class="grid grid-cols-3 gap-2">
                     <button onclick="setMode('ai')" id="btn-mode-ai" class="py-3 px-2 rounded border-2 text-[12px] font-bold tracking-wider uppercase transition-all bg-[#00ff88]/5 border-[#00ff88] text-[#00ff88]">
-                        🌐 ИИ Тема
+                        🌐 ИИ Генератор
                     </button>
                     <button onclick="setMode('manual')" id="btn-mode-manual" class="py-3 px-2 rounded border text-[12px] font-bold tracking-wider uppercase transition-all bg-transparent border-[#00ff88]/30 text-[#00ff88]/50 hover:border-[#00ff88]/70">
                         ✍️ Своё
@@ -61,24 +66,26 @@
                 </div>
             </div>
 
+            <!-- Контейнеры ввода -->
             <div id="input-ai-container" class="mb-7">
-                <label class="block text-xs uppercase tracking-wider text-[#00ff88]/60 mb-2">Введите тематику игры</label>
-                <input type="text" id="topic-input" placeholder="Любая тема: мебель, музыка, авто, игры..." class="w-full bg-black/40 border border-[#00ff88]/30 rounded px-4 py-3 text-lg text-white placeholder-[#00ff88]/30 focus:outline-none focus:border-[#00ff88]">
+                <label class="block text-xs uppercase tracking-wider text-[#00ff88]/60 mb-2">Какую категорию загадать ИИ?</label>
+                <input type="text" id="topic-input" placeholder="Например: видеоигры, тип музыки, мебель..." class="w-full bg-black/40 border border-[#00ff88]/30 rounded px-4 py-3 text-lg text-white placeholder-[#00ff88]/30 focus:outline-none focus:border-[#00ff88]">
             </div>
 
             <div id="input-manual-container" class="mb-7 hidden">
                 <label class="block text-xs uppercase tracking-wider text-[#00ff88]/60 mb-2">Секретное слово / Локация</label>
-                <input type="text" id="custom-word-input" placeholder="Введите секретное слово..." class="w-full bg-black/40 border border-[#00ff88]/30 rounded px-4 py-3 text-lg text-white placeholder-[#00ff88]/30 focus:outline-none focus:border-[#00ff88]">
+                <input type="text" id="custom-word-input" placeholder="Введите конкретное слово..." class="w-full bg-black/40 border border-[#00ff88]/30 rounded px-4 py-3 text-lg text-white placeholder-[#00ff88]/30 focus:outline-none focus:border-[#00ff88]">
             </div>
 
             <div id="input-random-container" class="mb-7 hidden">
                 <div class="bg-black/20 border border-dashed border-[#00ff88]/20 rounded p-4 text-center text-xs text-[#00ff88]/60 uppercase tracking-wider">
-                    🎲 Полный автомат: Система выберет случайное популярное место.
+                    🎲 Система выберет случайное популярное место.
                 </div>
             </div>
 
             <hr class="border-[#00ff88]/10 my-7">
 
+            <!-- Слайдеры игроков -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 <div>
                     <div class="flex justify-between text-xs uppercase tracking-wider mb-2">
@@ -96,21 +103,25 @@
                 </div>
             </div>
 
+            <!-- Кнопка СТАРТ -->
             <button onclick="startGame()" id="start-btn" class="w-full py-5 bg-[#00ff88] text-black font-bold tracking-widest uppercase rounded hover:bg-[#00dd77] transition-all cursor-pointer shadow-[0_0_15px_rgba(0,255,136,0.2)]">
                 Инициализировать игру
             </button>
         </div>
 
 
+        <!-- ЭКРАН 2: ВЫДАЧА КАРТОЧЕК -->
         <div id="card-screen" class="w-full hidden flex flex-col items-center">
             <div class="text-center mb-6">
                 <div class="text-xs uppercase tracking-widest text-[#00ff88]/60 mb-1">Слияние // Раздача ролей</div>
                 <h2 id="player-turn-title" class="text-xl font-bold uppercase text-[#00ff88]">ИГРОК №1, ПРИМИТЕ ДАННЫЕ</h2>
             </div>
 
+            <!-- Карточка -->
             <div class="w-full max-w-[340px] h-[450px] perspective cursor-pointer" onclick="flipCard()">
                 <div id="card-inner" class="card-inner w-full h-full relative rounded-xl border border-[#00ff88]/20 shadow-2xl">
                     
+                    <!-- Лицевая сторона -->
                     <div class="card-front absolute inset-0 bg-[#0d1210] flex flex-col items-center justify-between p-7">
                         <div class="w-full flex justify-between items-center text-[10px] text-[#00ff88]/40 tracking-wider">
                             <span>DOSSIER: CLASSIFIED</span>
@@ -128,6 +139,7 @@
                         <div class="text-[11px] text-[#00ff88]/30 uppercase tracking-widest">Кликните для открытия</div>
                     </div>
 
+                    <!-- Обратная сторона -->
                     <div id="card-back-el" class="card-back absolute inset-0 bg-black flex flex-col items-center justify-between p-7 border-2 border-[#00ff88]">
                         <div class="w-full flex justify-between items-center text-[10px] text-[#00ff88]/40 tracking-wider">
                             <span>DECRYPTED DATA</span>
@@ -135,20 +147,23 @@
                         </div>
                         
                         <div id="role-content" class="text-center w-full px-2">
-                            </div>
+                            <!-- Заполняется из JS -->
+                        </div>
 
-                        <div class="text-[11px] text-yellow-500/70 uppercase tracking-widest animate-pulse">Нажмите ещё раз, чтобы скрыть</div>
+                        <div class="text-[11px] text-yellow-500/70 uppercase tracking-widest">Нажмите ещё раз, чтобы скрыть</div>
                     </div>
 
                 </div>
             </div>
 
+            <!-- Кнопка перехода -->
             <button id="next-player-btn" onclick="nextPlayer()" class="mt-7 px-8 py-3 bg-transparent border border-[#00ff88]/40 text-[#00ff88] font-bold text-xs uppercase tracking-widest rounded opacity-0 pointer-events-none transition-all hover:bg-[#00ff88]/10">
                 Закрыть и передать →
             </button>
         </div>
 
 
+        <!-- ЭКРАН 3: ТАЙМЕР И ИГРА -->
         <div id="game-screen" class="w-full hidden bg-[#0d1210] border border-[#00ff88]/15 p-6 rounded-xl text-center">
             <h2 class="text-2xl font-bold tracking-widest uppercase text-red-500 mb-2">Шпионы в сети</h2>
             <p class="text-xs text-[#00ff88]/60 uppercase tracking-wider mb-6">Миссия: Задавайте вопросы. Вычислите врага!</p>
@@ -187,33 +202,31 @@
         let rolesArray = [];
         let currentPlayerIndex = 0;
         let isCardFlipped = false;
+        let isTransitioning = false; // Защита от кликов во время смены игрока
         
         let timerInterval;
         let timerSeconds = 240;
         let isTimerRunning = false;
 
         const HF_API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta";
-        const HF_TOKEN = "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"; // Твой рабочий токен
+        const HF_TOKEN = "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";
 
-        // Глобальная база стандартных локаций ТОЛЬКО для режима "Рандом"
         const globalRandomWords = ["Аквапарк", "Подводная Лодка", "Космический Корабль", "Отель", "Банк", "Полицейский Участок", "Больница", "Музей", "Самолет", "Супермаркет", "Цирк", "Научная Лаборатория", "Школа", "Зоопарк", "Ресторан", "Стадион", "Метро"];
 
-        // Умная резервная база на случай сбоя интернета (чтобы сразу выдать слово по контексту)
         function getBackupWord(topic) {
             const t = topic.toLowerCase();
             if (t.includes("мебел")) {
-                const arr = ["Шкаф-купе", "Кожаный Диван", "Кресло-качалка", "Письменный стол", "Двуспальная кровать"];
+                const arr = ["Шкаф-купе", "Кожаный Диван", "Кресло-качалка", "Письменный стол", "Кровать"];
                 return arr[Math.floor(Math.random() * arr.length)];
             }
             if (t.includes("музык")) {
-                const arr = ["Поп-музыка", "Рок-музыка", "Детская песня", "Классический Джаз", "Хип-хоп трек"];
+                const arr = ["Поп-музыка", "Рок-музыка", "Детская музыка", "Джаз", "Хип-хоп"];
                 return arr[Math.floor(Math.random() * arr.length)];
             }
-            if (t.includes("машин") || t.includes("авто")) {
-                const arr = ["Спорткар", "Внедорожник", "Грузовик", "Электромобиль", "Лимузин"];
+            if (t.includes("игр") || t.includes("видеоигр")) {
+                const arr = ["Minecraft", "GTA 5", "Brawl Stars", "Clash Royale", "Counter-Strike"];
                 return arr[Math.floor(Math.random() * arr.length)];
             }
-            // Если ввели что-то совсем уникальное, а сеть упала, превращаем саму тему в локацию
             return topic.charAt(0).toUpperCase() + topic.slice(1);
         }
 
@@ -262,20 +275,21 @@
         }
 
         async function generateWordViaAI(topic) {
-            // Идеально настроенный промпт без привязки к конкретным играм. Работает со ВСЕМ.
-            const prompt = `<|system|>You are a professional secret word generator for the party game "Spy".
-The user will input ANY category, theme, or concept in Russian (e.g., "мебель", "музыка", "одежда", "напитки").
-Your task is to analyze that theme and think of exactly ONE specific, distinct, well-known sub-category, item, or item type that perfectly fits it.
-Respond strictly with 1-2 words in Russian. Do NOT use punctuation, quotes, dots, or explanations. 
+            // Жёсткий и ультимативный системный промпт. ИИ ЗАПРЕЩЕНО повторять тему юзера.
+            const prompt = `<|system|>You are a professional item-generator for the game "Spy".
+The user will name a generic category or type of things in Russian (e.g., "видеоигры", "тип музыки", "мебель", "одежда").
+Your absolute and strict duty is to name ONE specific sub-type, specific item, or famous representative of that category.
+NEVER repeat the exact word the user gave you. Give a concrete example instead!
+Respond strictly with 1-2 words in Russian. Do not include quotes, markdown, punctuation, or explanations.
 
 Examples:
+User: видеоигры -> Assistant: Minecraft
+User: тип музыки -> Assistant: Поп-музыка
 User: мебель -> Assistant: Письменный стол
-User: музыка -> Assistant: Рок музыка
-User: транспорт -> Assistant: Электросамокат
-User: школьные предметы -> Assistant: Учебник физики
-User: еда -> Assistant: Пицца пепперони
+User: транспорт -> Assistant: Вертолет
+User: еда -> Assistant: Пепперони пицца
 
-Analyze the user's input now and generate the single word.</s><|user|>Тема: "${topic}"\nСлово:</s><|assistant|>`;
+Generate exactly one specific target item for the user's input now.</s><|user|>Тема: "${topic}"\nСлово:</s><|assistant|>`;
             
             try {
                 const response = await fetch(HF_API_URL, {
@@ -287,12 +301,12 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
                     body: JSON.stringify({
                         inputs: prompt,
                         parameters: { 
-                            max_new_tokens: 12, 
-                            temperature: 0.2, // Минимальная креативность для максимальной точности
+                            max_new_tokens: 10, 
+                            temperature: 0.1, // Практически нулевая случайность для чёткого следования правилам
                             top_p: 0.9
                         }
                     }),
-                    signal: AbortSignal.timeout(4000)
+                    signal: AbortSignal.timeout(4500)
                 });
                 
                 const data = await response.json();
@@ -303,7 +317,8 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
                 
                 textResult = textResult.trim().replace(/["'‘“’`.]/g, '');
                 
-                if (!textResult || textResult.length > 30) {
+                // Проверяем глупый случай, когда ИИ вернул саму тему в ответ
+                if (!textResult || textResult.length > 30 || textResult.toLowerCase() === topic.toLowerCase()) {
                     return getBackupWord(topic);
                 }
                 
@@ -316,18 +331,17 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
         async function startGame() {
             const startBtn = document.getElementById('start-btn');
             startBtn.disabled = true;
-            startBtn.innerText = "ЗАГРУЗКА ДАННЫХ...";
+            startBtn.innerText = "ГЕНЕРАЦИЯ ИИ...";
 
             if (gameMode === 'manual') {
                 secretWord = document.getElementById('custom-word-input').value.trim() || "Секретный Объект";
             } else if (gameMode === 'random') {
                 secretWord = globalRandomWords[Math.floor(Math.random() * globalRandomWords.length)];
             } else {
-                let topic = document.getElementById('topic-input').value.trim() || "Мебель";
+                let topic = document.getElementById('topic-input').value.trim() || "Видеоигры";
                 secretWord = await generateWordViaAI(topic);
             }
 
-            // Построение колоды ролей
             rolesArray = [];
             for (let i = 0; i < totalSpies; i++) {
                 rolesArray.push("ШПИОН");
@@ -339,6 +353,7 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
             rolesArray.sort(() => Math.random() - 0.5);
 
             currentPlayerIndex = 0;
+            isTransitioning = false;
             showCardForPlayer();
             
             document.getElementById('setup-screen').classList.add('hidden');
@@ -360,9 +375,9 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
             
             if (isSpy) {
                 document.getElementById('role-content').innerHTML = `
-                    <h3 class="text-3xl font-bold tracking-widest text-red-500 mb-3 animate-pulse">ВЫ ШПИОН!</h3>
+                    <h3 class="text-3xl font-bold tracking-widest text-red-500 mb-3">ВЫ ШПИОН!</h3>
                     <p class="text-[13px] text-red-400/90 uppercase max-w-[240px] mx-auto leading-relaxed">
-                        Секретное слово скрыто от вас. Вычисляйте тему по вопросам игроков и не выдайте себя!
+                        Секретное слово скрыто. Задавайте хитрые вопросы, чтобы узнать тему!
                     </p>
                 `;
                 document.getElementById('card-back-el').style.borderColor = "#ef4444";
@@ -375,16 +390,21 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
                         ${rolesArray[currentPlayerIndex]}
                     </h3>
                     <p class="text-[13px] text-[#00ff88]/80 max-w-[240px] mx-auto leading-relaxed">
-                        Вы местный. Ищите шпиона аккуратными вопросами!
+                        Вы местный. Найдите шпиона, не раскрыв секретное слово!
                     </p>
                 `;
                 document.getElementById('card-back-el').style.borderColor = "#00ff88";
                 document.getElementById('card-status-label').innerText = "STATUS: SECURE";
                 document.getElementById('card-status-label').style.color = "#00ff88";
             }
+            
+            // Карта готова, блокировку снимаем
+            isTransitioning = false;
         }
 
         function flipCard() {
+            if (isTransitioning) return; // Если идёт смена игрока, кликать нельзя
+            
             isCardFlipped = !isCardFlipped;
             const cardInner = document.getElementById('card-inner');
             const nextBtn = document.getElementById('next-player-btn');
@@ -405,19 +425,39 @@ Analyze the user's input now and generate the single word.</s><|user|>Тема: 
         }
 
         function nextPlayer() {
-            if (currentPlayerIndex < totalPlayers - 1) {
-                currentPlayerIndex++;
-                showCardForPlayer();
-            } else {
-                document.getElementById('card-screen').classList.add('hidden');
-                document.getElementById('game-screen').classList.remove('hidden');
-                startTimer();
-            }
+            if (isTransitioning) return;
+            isTransitioning = true; // Включаем защиту
+
+            const cardInner = document.getElementById('card-inner');
+            const nextBtn = document.getElementById('next-player-btn');
+
+            // 1. Прячем кнопку сразу же
+            nextBtn.classList.add('opacity-0', 'pointer-events-none');
+
+            // 2. Поворачиваем карту рубашкой вверх (закрываем её)
+            cardInner.classList.remove('flipped');
+
+            // 3. Ждём окончания анимации закрытия (400мс)
+            setTimeout(() => {
+                // Очищаем старый текст КАРДИНАЛЬНО, чтобы он даже на миллисекунду не всплыл
+                document.getElementById('role-content').innerHTML = `<div class="text-black">ЗАГРУЗКА...</div>`;
+                
+                if (currentPlayerIndex < totalPlayers - 1) {
+                    currentPlayerIndex++;
+                    // Загружаем данные нового игрока
+                    showCardForPlayer();
+                } else {
+                    // Конец раздачи — включаем таймер
+                    document.getElementById('card-screen').classList.add('hidden');
+                    document.getElementById('game-screen').classList.remove('hidden');
+                    startTimer();
+                }
+            }, 400); 
         }
 
         function startTimer() {
             clearInterval(timerInterval);
-            timerSeconds = totalPlayers * 60; // 1 минута на человека по умолчанию
+            timerSeconds = totalPlayers * 60; 
             isTimerRunning = true;
             updateTimerDisplay();
             
