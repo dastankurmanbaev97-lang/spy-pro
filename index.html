@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPYMIND // АГЕНТУРНАЯ СЕТЬ</title>
+    <!-- Подключаем Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        /* Анимация переворота карточки */
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-[#0a0f0d] text-[#00ff66] min-h-screen flex flex-col justify-between p-4 selection:bg-[#00ff66] selection:text-black">
+
+    <!-- Хедер в стиле терминала -->
+    <header class="border-b border-[#00ff66]/30 py-3 flex justify-between items-center max-w-2xl mx-auto w-full">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#00ff66] animate-pulse"></span>
+            <span class="tracking-widest font-bold text-lg">SPYMIND // v1.0.4</span>
+        </div>
+        <div class="text-xs text-[#00ff66]/60 uppercase tracking-wider">Статус: Зашифровано</div>
+    </header>
+
+    <!-- Основной контейнер игры -->
+    <main class="flex-grow flex items-center justify-center my-6 w-full max-w-2xl mx-auto">
+        
+        <!-- ЭКРАН 1: НАСТРОЙКИ -->
+        <div id="setup-screen" class="w-full bg-[#111814] border border-[#00ff66]/20 p-6 rounded-lg shadow-[0_0_20px_rgba(0,255,102,0.05)]">
+            <h1 class="text-2xl text-center font-bold tracking-widest mb-6 uppercase text-[#00ff66] border-b border-[#00ff66]/20 pb-3">
+                Настройка операции
+            </h1>
+
+            <!-- Выбор режима создания слова -->
+            <div class="mb-6">
+                <label class="block text-xs uppercase tracking-wider text-[#00ff66]/70 mb-2">Режим генерации локации</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setMode('ai')" id="btn-mode-ai" class="py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-[#00ff66]/10 border-[#00ff66] text-[#00ff66]">
+                        🤖 ИИ-Генератор
+                    </button>
+                    <button onclick="setMode('manual')" id="btn-mode-manual" class="py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-transparent border-[#00ff66]/30 text-[#00ff66]/50 hover:border-[#00ff66]/70">
+                        ✍️ Своё слово
+                    </button>
+                </div>
+            </div>
+
+            <!-- Поля ввода в зависимости от режима -->
+            <div id="input-ai-container" class="mb-6">
+                <label class="block text-xs uppercase tracking-wider text-[#00ff66]/70 mb-2">Введите тему (например: Бравл Старс, Школа, Марвел)</label>
+                <input type="text" id="topic-input" placeholder="Бравл Старс" class="w-full bg-black/50 border border-[#00ff66]/30 rounded px-4 py-2.5 text-[#00ff66] placeholder-[#00ff66]/30 focus:outline-none focus:border-[#00ff66]">
+                <p class="text-[11px] text-[#00ff66]/40 mt-1">*ИИ сам подберет секретное место из этой вселенной</p>
+            </div>
+
+            <div id="input-manual-container" class="mb-6 hidden">
+                <label class="block text-xs uppercase tracking-wider text-[#00ff66]/70 mb-2">Секретное слово / Локация</label>
+                <input type="text" id="custom-word-input" placeholder="Введите секретное место..." class="w-full bg-black/50 border border-[#00ff66]/30 rounded px-4 py-2.5 text-[#00ff66] placeholder-[#00ff66]/30 focus:outline-none focus:border-[#00ff66]">
+            </div>
+
+            <hr class="border-[#00ff66]/10 my-6">
+
+            <!-- Слайдеры игроков -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <div class="flex justify-between text-xs uppercase tracking-wider mb-2">
+                        <span>Агентов всего:</span>
+                        <span id="player-count-val" class="font-bold text-[#00ff66]">4</span>
+                    </div>
+                    <input type="range" id="player-count" min="3" max="12" value="4" oninput="updateSliders()" class="w-full accent-[#00ff66] cursor-pointer">
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs uppercase tracking-wider mb-2">
+                        <span>Из них шпионов:</span>
+                        <span id="spy-count-val" class="font-bold text-red-500">1</span>
+                    </div>
+                    <input type="range" id="spy-count" min="1" max="3" value="1" oninput="updateSliders()" class="w-full accent-red-500 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Кнопка СТАРТ -->
+            <button onclick="startGame()" id="start-btn" class="w-full py-4 bg-[#00ff66] text-black font-bold tracking-widest uppercase rounded hover:bg-[#00dd55] transition-all cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.3)]">
+                Инициализировать игру
+            </button>
+        </div>
+
+
+        <!-- ЭКРАН 2: ВЫДАЧА КАРТОЧЕК (ОДИН ТЕЛЕФОН) -->
+        <div id="card-screen" class="w-full hidden flex flex-col items-center">
+            
+            <!-- Информационная плашка сверху -->
+            <div class="text-center mb-6">
+                <div class="text-xs uppercase tracking-widest text-[#00ff66]/60 mb-1">Передача устройства</div>
+                <h2 id="player-turn-title" class="text-xl font-bold uppercase text-[#00ff66]">ИГРОК №1, СЧИТАЙТЕ ДАННЫЕ</h2>
+            </div>
+
+            <!-- Сама шпионская 3D-карточка -->
+            <div class="w-full max-w-[340px] h-[440px] perspective cursor-pointer" onclick="flipCard()">
+                <div id="card-inner" class="card-inner w-full h-full relative rounded-xl border border-[#00ff66]/30 shadow-2xl">
+                    
+                    <!-- Лицевая сторона (Закрыто) -->
+                    <div class="card-front absolute inset-0 bg-[#0f1712] rounded-xl flex flex-col items-center justify-between p-6">
+                        <div class="w-full flex justify-between items-center text-[10px] text-[#00ff66]/40 tracking-wider">
+                            <span>ID-DOSSIER: PRT-99</span>
+                            <span>STATUS: LOCKED</span>
+                        </div>
+                        <div class="flex flex-col items-center text-center">
+                            <!-- Иконка прицела/отпечатка -->
+                            <div class="w-20 h-20 rounded-full border-2 border-dashed border-[#00ff66]/30 flex items-center justify-center mb-4 animate-spin-slow">
+                                <span class="text-2xl">🔒</span>
+                            </div>
+                            <div class="border border-red-500/40 text-red-500 text-xs font-bold uppercase tracking-widest px-3 py-1 bg-red-500/5 rotate-[-5deg] mb-3">
+                                TOP SECRET // СЕКРЕТНО
+                            </div>
+                            <p class="text-xs text-[#00ff66]/60 max-w-[200px]">Нажмите, чтобы расшифровать и узнать свою роль</p>
+                        </div>
+                        <div class="text-[11px] text-[#00ff66]/30 uppercase tracking-widest">Кликните для открытия</div>
+                    </div>
+
+                    <!-- Обратная сторона (Открыто - Роль) -->
+                    <div id="card-back-el" class="card-back absolute inset-0 bg-black rounded-xl border-2 border-[#00ff66] flex flex-col items-center justify-between p-6">
+                        <div class="w-full flex justify-between items-center text-[10px] text-[#00ff66]/40 tracking-wider">
+                            <span>DECRYPTED DATA</span>
+                            <span id="card-status-label">STATUS: OK</span>
+                        </div>
+                        
+                        <!-- Тут рендерится текст роли -->
+                        <div id="role-content" class="text-center w-full px-2">
+                            <!-- Заполняется из JS -->
+                        </div>
+
+                        <div class="text-[11px] text-yellow-500/60 uppercase tracking-widest animate-pulse">Кликните, чтобы спрятать</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Вспомогательная кнопка внизу -->
+            <button id="next-player-btn" onclick="nextPlayer()" class="mt-6 px-6 py-2.5 bg-transparent border border-[#00ff66]/40 text-[#00ff66] font-bold text-xs uppercase tracking-widest rounded opacity-0 pointer-events-none transition-all hover:bg-[#00ff66]/10">
+                Следующий игрок →
+            </button>
+        </div>
+
+
+        <!-- ЭКРАН 3: ТАЙМЕР И ИГРА -->
+        <div id="game-screen" class="w-full hidden bg-[#111814] border border-[#00ff66]/20 p-6 rounded-lg text-center">
+            <h2 class="text-xl font-bold tracking-widest uppercase text-red-500 mb-2">ШПИОН СРЕДИ НАС</h2>
+            <p class="text-xs text-[#00ff66]/60 uppercase tracking-wider mb-6">Задавайте вопросы друг другу. Время пошло!</p>
+            
+            <!-- Таймер обратного отсчета -->
+            <div id="timer-display" class="text-5xl font-bold text-[#00ff66] tracking-widest my-8 font-mono animate-pulse">
+                08:00
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="toggleTimer()" id="timer-toggle-btn" class="py-3 bg-[#00ff66]/10 border border-[#00ff66] text-[#00ff66] font-bold text-xs uppercase tracking-wider rounded">
+                    Пауза
+                </button>
+                <button onclick="resetToSetup()" class="py-3 bg-red-950/40 border border-red-700/50 text-red-400 font-bold text-xs uppercase tracking-wider rounded hover:bg-red-900/30">
+                    В штаб (Сброс)
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Футер -->
+    <footer class="border-t border-[#00ff66]/10 pt-3 text-center text-[11px] text-[#00ff66]/30 max-w-2xl mx-auto w-full">
+        Устройство защищено протоколом сквозного шифрования. 
+    </footer>
+
+    <!-- Скрипты логики -->
+    <script>
+        let gameMode = 'ai'; // 'ai' или 'manual'
+        let totalPlayers = 4;
+        let totalSpies = 1;
+        let secretWord = '';
+        let rolesArray = [];
+        let currentPlayerIndex = 0;
+        let isCardFlipped = false;
+        
+        let timerInterval;
+        let timerSeconds = 480; // 8 минут по дефолту
+        let isTimerRunning = false;
+
+        // Hugging Face Конфигурация
+        // ВНИМАНИЕ: Для полноценной работы ИИ без ограничений, сюда можно вставить свой бесплатный HF Token.
+        // Мы используем открытую модель, умеющую креативить.
+        const HF_API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta";
+        const HF_TOKEN = ""; // Сюда можно вставить токен, если лимиты начнут падать.
+
+        function setMode(mode) {
+            gameMode = mode;
+            const btnAi = document.getElementById('btn-mode-ai');
+            const btnManual = document.getElementById('btn-mode-manual');
+            const containerAi = document.getElementById('input-ai-container');
+            const containerManual = document.getElementById('input-manual-container');
+
+            if (mode === 'ai') {
+                btnAi.className = "py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-[#00ff66]/10 border-[#00ff66] text-[#00ff66]";
+                btnManual.className = "py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-transparent border-[#00ff66]/30 text-[#00ff66]/50 hover:border-[#00ff66]/70";
+                containerAi.classList.remove('hidden');
+                containerManual.classList.add('hidden');
+            } else {
+                btnManual.className = "py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-[#00ff66]/10 border-[#00ff66] text-[#00ff66]";
+                btnAi.className = "py-2.5 px-4 rounded border text-sm font-bold tracking-wider uppercase transition-all bg-transparent border-[#00ff66]/30 text-[#00ff66]/50 hover:border-[#00ff66]/70";
+                containerManual.classList.remove('hidden');
+                containerAi.classList.add('hidden');
+            }
+        }
+
+        function updateSliders() {
+            totalPlayers = parseInt(document.getElementById('player-count').value);
+            totalSpies = parseInt(document.getElementById('spy-count').value);
+            
+            // Защита, чтобы шпионов не было больше, чем игроков
+            if (totalSpies >= totalPlayers - 1) {
+                totalSpies = totalPlayers - 2;
+                if(totalSpies < 1) totalSpies = 1;
+                document.getElementById('spy-count').value = totalSpies;
+            }
+
+            document.getElementById('player-count-val').innerText = totalPlayers;
+            document.getElementById('spy-count-val').innerText = totalSpies;
+        }
+
+        // Функция запроса к нейросети Hugging Face
+        async function generateWordViaAI(topic) {
+            const prompt = `<|system|>Вы — генератор секретных локаций для игры Шпион. Игрок пишет тему, а вы должны выдать ОДНО конкретное, интересное и узнаваемое место, здание или локацию из этой темы на русском языке. Отвечайте строго в формате одного названия, без лишних слов, без знаков препинания и без кавычек. Сделайте локацию неожиданной.</s><|user|>Тема: "${topic}"\nСекретная локация:</s><|assistant|>`;
+            
+            try {
+                const response = await fetch(HF_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(HF_TOKEN ? { "Authorization": `Bearer ${HF_TOKEN}` } : {})
+                    },
+                    body: JSON.stringify({
+                        inputs: prompt,
+                        parameters: { max_new_tokens: 15, temperature: 0.7 }
+                    })
+                });
+                
+                const data = await response.json();
+                let textResult = data[0]?.generated_text || "";
+                // Вытаскиваем только чистый ответ ассистента
+                if (textResult.includes("<|assistant|>")) {
+                    textResult = textResult.split("<|assistant|>").pop();
+                }
+                textResult = textResult.trim().replace(/["'‘“.]/g, '');
+                return textResult || "Засекреченный Бункер";
+            } catch (e) {
+                console.error("Ошибка ИИ:", e);
+                // Запасной список на случай отсутствия интернета или лимитов
+                const fallbacks = ["Арена Захват Кристаллов", "Кабинет Директора", "Пляж", "Секретная Лаборатория"];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+        }
+
+        async function startGame() {
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = true;
+            startBtn.innerText = "ШИФРОВАНИЕ КАНАЛА...";
+
+            // 1. Получаем секретное слово
+            if (gameMode === 'manual') {
+                secretWord = document.getElementById('custom-word-input').value.trim() || "Секретный Объект";
+            } else {
+                let topic = document.getElementById('topic-input').value.trim() || "Бравл Старс";
+                secretWord = await generateWordViaAI(topic);
+            }
+
+            // 2. Строим колоду ролей
+            rolesArray = [];
+            for (let i = 0; i < totalSpies; i++) {
+                rolesArray.push("ШПИОН");
+            }
+            while (rolesArray.length < totalPlayers) {
+                rolesArray.push(secretWord);
+            }
+
+            // Перемешиваем массив карт случайным образом
+            rolesArray.sort(() => Math.random() - 0.5);
+
+            // 3. Переключаем экран
+            currentPlayerIndex = 0;
+            showCardForPlayer();
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('card-screen').classList.remove('hidden');
+            
+            startBtn.disabled = false;
+            startBtn.innerText = "Инициализировать игру";
+        }
+
+        function showCardForPlayer() {
+            isCardFlipped = false;
+            document.getElementById('card-inner').classList.remove('flipped');
+            document.getElementById('player-turn-title').innerText = `ИГРОК №${currentPlayerIndex + 1}, СЧИТАЙТЕ ДАННЫЕ`;
+            
+            // Скрываем кнопку перехода дальше
+            const nextBtn = document.getElementById('next-player-btn');
+            nextBtn.classList.add('opacity-0', 'pointer-events-none');
+
+            // Готовим начинку карты заранее
+            const isSpy = rolesArray[currentPlayerIndex] === "ШПИОН";
+            const roleContentHtml = isSpy 
+                ? `<h3 class="text-3xl font-bold tracking-widest text-red-500 mb-2 animate-bounce">ВЫ ШПИОН!</h3>
+                   <p class="text-xs text-red-400/80 uppercase max-w-[240px] mx-auto">Ваша цель: не выдать себя, понять секретную локацию по вопросам других игроков и назвать её.</p>`
+                : `<p class="text-xs text-[#00ff66]/60 uppercase tracking-widest mb-1">Ваша локация:</p>
+                   <h3 class="text-2xl font-bold tracking-wider text-white border-y border-[#00ff66]/30 py-3 my-2 uppercase bg-[#00ff66]/5">${rolesArray[currentPlayerIndex]}</h3>
+                   <p class="text-xs text-[#00ff66]/80 max-w-[240px] mx-auto">Вы местный. Задавайте вопросы осторожно, чтобы вычислить шпиона, но не раскрыть место!</p>`;
+            
+            document.getElementById('role-content').innerHTML = roleContentHtml;
+            
+            const cardBack = document.getElementById('card-back-el');
+            const statusLabel = document.getElementById('card-status-label');
+            if (isSpy) {
+                cardBack.style.borderColor = "#ef4444";
+                statusLabel.innerText = "WARNING: INTRUDER";
+                statusLabel.style.color = "#ef4444";
+            } else {
+                cardBack.style.borderColor = "#00ff66";
+                statusLabel.innerText = "STATUS: SECURE";
+                statusLabel.style.color = "#00ff66";
+            }
+        }
+
+        function flipCard() {
+            isCardFlipped = !isCardFlipped;
+            const cardInner = document.getElementById('card-inner');
+            const nextBtn = document.getElementById('next-player-btn');
+
+            if (isCardFlipped) {
+                cardInner.classList.add('flipped');
+                // Разрешаем кликнуть дальше
+                nextBtn.classList.remove('opacity-0', 'pointer-events-none');
+                if (currentPlayerIndex === totalPlayers - 1) {
+                    nextBtn.innerText = "ВЫЙТИ В ЭФИР →";
+                } else {
+                    nextBtn.innerText = "ЗАКРЫТЬ И ПЕРЕДАТЬ →";
+                }
+            } else {
+                cardInner.classList.remove('flipped');
+                nextBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function nextPlayer() {
+            if (currentPlayerIndex < totalPlayers - 1) {
+                currentPlayerIndex++;
+                showCardForPlayer();
+            } else {
+                // Все посмотрели, переходим к фазе обсуждения
+                document.getElementById('card-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.remove('hidden');
+                startTimer();
+            }
+        }
+
+        // Логика Таймера
+        function startTimer() {
+            timerSeconds = totalPlayers * 60; // 1 минута на человека по дефолту
+            isTimerRunning = true;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    document.getElementById('timer-display').innerText = "ВРЕМЯ ИСТЕКЛО!";
+                    document.getElementById('timer-display').style.color = "#ef4444";
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const seconds = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-toggle-btn');
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.innerText = "Продолжить";
+                btn.style.color = "#00ff66";
+            } else {
+                isTimerRunning = true;
+                btn.innerText = "Пауза";
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetToSetup() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            document.getElementById('timer-display').style.color = "#00ff66";
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
